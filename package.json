@@ -12,6 +12,7 @@
   },
   "files": [
     "dist",
+    "assets",
     "npm-shrinkwrap.json",
     "docs",
     "examples",
@@ -45,6 +46,7 @@
   ],
   "license": "MIT",
   "magpie": {
+    "icon": "https://raw.githubusercontent.com/mu-zi-lee/magpie-chatgptweb2api/main/assets/icon.png",
     "maxConcurrency": 1
   },
   "dependencies": {
