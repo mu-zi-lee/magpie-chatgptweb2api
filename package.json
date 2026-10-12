@@ -1,0 +1,62 @@
+{
+  "name": "magpie-chatgptweb2api",
+  "version": "0.1.0",
+  "description": "ChatGPT browser conversations as a native Magpie text provider",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "chatgpt-web": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "npm-shrinkwrap.json",
+    "docs",
+    "examples",
+    "Dockerfile",
+    "compose.yaml",
+    "compose.gateway.yaml",
+    "docker",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test --test-concurrency=1 test/*.test.mjs",
+    "test:magpie": "npm run build && node --test test/magpie-host.integration.mjs",
+    "browser:install": "playwright install chromium",
+    "login": "npm run build && node dist/cli.js login",
+    "guest": "npm run build && node dist/cli.js guest",
+    "doctor": "npm run build && node dist/cli.js doctor",
+    "chat": "npm run build && node dist/cli.js chat",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "magpie",
+    "opencode-plugin",
+    "chatgpt",
+    "playwright"
+  ],
+  "license": "MIT",
+  "magpie": {
+    "maxConcurrency": 1
+  },
+  "dependencies": {
+    "playwright": "1.64.0",
+    "proper-lockfile": "^4.1.2",
+    "turndown": "7.2.0",
+    "turndown-plugin-gfm": "1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/turndown": "^5.0.5",
+    "typescript": "5.9.3"
+  }
+}

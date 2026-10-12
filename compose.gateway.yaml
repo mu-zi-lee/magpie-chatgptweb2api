@@ -1,0 +1,15 @@
+services:
+  browser:
+    build:
+      context: .
+      target: gateway
+      args:
+        MAGPIE_IMAGE: ${MAGPIE_IMAGE:-ghcr.io/yetone/magpie:latest}
+    ports:
+      - "127.0.0.1:3425:3425"
+      - "127.0.0.1:3430:3430"
+    volumes:
+      - gateway-data:/data
+
+volumes:
+  gateway-data:

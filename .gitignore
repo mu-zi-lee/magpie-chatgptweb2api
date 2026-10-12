@@ -1,0 +1,9 @@
+node_modules/
+*.tgz
+.DS_Store
+coverage/
+.test-output/
+*.log
+cookies/
+cookies.json
+*.cookies.json

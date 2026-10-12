@@ -1,0 +1,40 @@
+services:
+  browser:
+    build:
+      context: .
+      target: browser
+    init: true
+    restart: unless-stopped
+    shm_size: 2gb
+    ports:
+      - "127.0.0.1:6080:6080"
+    volumes:
+      - profiles:/data/profiles
+    secrets:
+      - vnc_auth
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:6080/vnc.html"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run", "--token-file", "/run/secrets/cloudflare_tunnel_token"]
+    depends_on:
+      browser:
+        condition: service_healthy
+    secrets:
+      - cloudflare_tunnel_token
+
+volumes:
+  profiles:
+
+secrets:
+  vnc_auth:
+    file: ${VNC_PASSWORD_FILE:?Set VNC_PASSWORD_FILE to an external authentication file}
+  cloudflare_tunnel_token:
+    file: ${CLOUDFLARE_TUNNEL_TOKEN_FILE:-/dev/null}

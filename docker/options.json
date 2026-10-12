@@ -1,0 +1,6 @@
+{
+  "profilesDir": "/data/profiles",
+  "browserMode": "keep-open",
+  "headless": false,
+  "loginTimeoutMs": 900000
+}

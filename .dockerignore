@@ -1,0 +1,10 @@
+.git
+node_modules
+test
+assets
+*.cookies.json
+*.cookies.txt
+.env
+.env.*
+secrets
+docker-logs
