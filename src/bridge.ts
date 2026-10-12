@@ -143,7 +143,7 @@ export class BrowserBridge {
   async call<T>(method: "loginBegin" | "cookieBegin" | "loginWait" | "guestBegin" | "guestWait" | "status", params: unknown, signal?: AbortSignal): Promise<T> {
     checkAbort(signal);
     await this.start();
-    return await this.rawCall(method, params, method === "loginWait" ? this.options.loginTimeoutMs + 15_000 : method === "guestWait" ? 75_000 : 60_000, signal) as T;
+    return await this.rawCall(method, params, method === "loginWait" ? this.options.loginTimeoutMs + 15_000 : method === "guestWait" ? 75_000 : 300_000, signal) as T;
   }
 
   async open(profileId: string, completion: Completion, signal?: AbortSignal): Promise<AsyncIterableIterator<BrowserEvent>> {

@@ -11,6 +11,7 @@ import { readCookieFile } from "./cookies.js";
 import { readInternalReply } from "./internal-reader.js";
 import { Submission } from "./submission.js";
 import { sendInternal } from "./internal-sender.js";
+import { managedBrowserExecutable } from "./browser-install.js";
 const COMPOSER = '[data-testid="prompt-textarea"], #prompt-textarea, textarea[data-mobile-composer-prompt], textarea[data-id="root"], [contenteditable="true"][data-lexical-editor="true"], form[data-chatgpt-composer] [data-composer-markdown][contenteditable="true"][role="textbox"]';
 const SEND = '[data-testid="send-button"], [data-testid="composer-submit-button"], button[data-composer-submit], form[data-chatgpt-composer] button[type="submit"], button[aria-label="Send prompt"], button[aria-label="发送提示"]';
 const STOP = '[data-testid="stop-button"], button[data-composer-submit]:has([data-composer-stop-icon]:not([hidden])), form[data-chatgpt-composer] button[aria-label="Stop"], button[aria-label="Stop generating"], button[aria-label="停止生成"]';
@@ -118,7 +119,7 @@ export class BrowserRuntime {
             }
             else {
                 context = await chromium.launchPersistentContext(this.directory(id), {
-                    executablePath: this.options.executablePath,
+                    executablePath: this.options.executablePath ?? (this.options.channel ? undefined : await managedBrowserExecutable()),
                     channel: this.options.channel,
                     headless: login && this.origin === new URL(SITE_URL).origin ? false : this.options.headless,
                     viewport: { width: 1280, height: 900 },
@@ -133,7 +134,7 @@ export class BrowserRuntime {
                 throw e;
             const message = String(e?.message ?? "");
             if (/Executable doesn't exist|executable.*does not exist|executablePath/i.test(message))
-                throw new WebError("Browser not found. Run npm run browser:install, or configure channel/executablePath", 503, "browser_missing");
+                throw new WebError("Browser not found; automatic installation failed. Configure channel or executablePath", 503, "browser_missing");
             if (/ProcessSingleton|SingletonLock|user data directory is already in use/i.test(message))
                 throw new WebError("This browser profile is open in another process; close it and retry", 409, "profile_in_use");
             throw new WebError("Unable to start the dedicated browser; check browser installation and profile permissions", 503, "browser_launch_failed");

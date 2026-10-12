@@ -6,7 +6,7 @@
 
 ## 本地试用
 
-需要 Node 22+。Magpie 自带的 Bun 负责插件运行；Chromium 或本机 Chrome/Edge 需另行准备。
+需要 Node 22+。Magpie 自带的 Bun 负责插件运行。首次使用时插件会把匹配版本的 Chromium 自动下载到插件目录的 `.playwright-browsers`，不使用全局浏览器缓存。也可以配置已有的 Chrome/Edge，插件不会安装或删除它们。显式设置 `PLAYWRIGHT_BROWSERS_PATH` 的部署使用该外部缓存，不自动补装。
 
 ```sh
 npm install
@@ -17,7 +17,7 @@ npm run chat -- --prompt '请用中文介绍一下自己'
 npm run doctor
 ```
 
-`guest` 打开独立匿名浏览器并验证输入框，成功后复用同一 profile，不按请求重置匿名会话。匿名入口是否可用以实际网页为准；若网页要求验证，在专用窗口中处理。匿名模式不代表拥有订阅模型权限。
+`guest` 打开独立匿名浏览器并验证输入框，成功后复用同一 profile，不按请求重置匿名会话。匿名入口是否可用以实际网页为准；若网页要求验证，在专用窗口中处理。匿名模式不代表拥有订阅模型权限。若自动下载受网络或权限限制失败，可先运行 `npm run browser:install`，或配置 `channel` / `executablePath`。
 
 **推荐手动登录**：需要账号模式时运行 `npm run login`。密码、验证码和 Google 登录均在网页里完成，插件只检测登录完成并保存本地关联。正常完成登录、验证或两步认证后，程序在聊天输入框出现时自动保存本地关联。默认新 profile 使用 `keep-open` 模式：浏览器正常启动，插件连接同一个浏览器。CLI 完成、worker 重启或空闲断开后，登录窗口继续打开；文本请求只新建及关闭自己的标签页。无需复制网页 Cookie 或 Access Token。浏览器启动失败时可配置本机可执行文件或浏览器 channel，见下文。
 
@@ -88,7 +88,9 @@ Magpie Plugins → Options 使用 JSON。CLI 可保存到一个本地文件，�
 }
 ```
 
-如果使用已安装 Chrome，可加入 `"channel": "chrome"`；Edge 是 `"msedge"`。使用自定义 Chromium 则设置 `"executablePath": "/absolute/path/to/browser"`。`channel` 与 `executablePath` 二选一。安装 Playwright Chromium 后两者都可留空。
+如果使用已安装 Chrome，可加入 `"channel": "chrome"`；Edge 是 `"msedge"`。使用自定义 Chromium 则设置 `"executablePath": "/absolute/path/to/browser"`。`channel` 与 `executablePath` 二选一。两者留空时自动准备插件专用 Chromium。
+
+本机桌面登录无需 Cloudflare Tunnel。服务器的可见登录需要显示环境（如 Xvfb）和远程桌面（如 noVNC）；Tunnel 只提供受保护的远程访问，不安装浏览器、不改变浏览器访问 ChatGPT 的出站网络，也不解决上游验证。没有显示环境时，保持窗口模式返回 `browser_display_missing`。
 
 代理通过 `"proxy": "http://127.0.0.1:7890"` 显式设置，支持 HTTP/HTTPS/SOCKS5 的无账号密码 URL。浏览器不会自动继承 Magpie 的全局/账号代理。改变浏览器或代理选项后重启插件；同一机器上共享 profiles 目录的多个 worker 以 profile 文件锁串行，冲突返回 `account_busy`；异常退出的锁等待 30 秒后可恢复。请使用本机文件系统，不将同一 profiles 卷共享给独立服务器。
 
@@ -140,7 +142,7 @@ Magpie Plugins → Options 使用 JSON。CLI 可保存到一个本地文件，�
 
 可用 `profilesDir` 自定义独立目录。浏览器配置文件包含登录状态，应按凭据保护。保持窗口模式下，退出 Magpie 或 CLI、空闲回收只断开连接，浏览器由用户手动关闭；managed 模式才会关闭浏览器。磁盘登录会话保留，但能否跨重启继续登录取决于上游和浏览器。
 
-Magpie 移除账号或卸载插件不会自动删除这些 profile。清理时先关闭 CLI、插件和所选 profile 的专用浏览器窗口，再删除所选 UUID 目录；清除所有网页登录会话可删除整个插件专用 profiles 目录。CLI 的账号关联保存在该目录下的 `cli-profile.json`，不是网页 Cookie。
+Magpie 移除账号不会自动删除这些 profile。通过 npm/Git 安装时，卸载会移除插件包目录，其中包含自动下载的 Chromium；本地路径安装只取消关联，不删除你的源码目录，因此其中的 `.playwright-browsers` 需自行删除。卸载前先关闭专用浏览器窗口。外部浏览器、显式配置的共享缓存及用户数据目录中的登录 profile 不会随插件删除。清理账号时先关闭 CLI、插件和所选 profile 的专用浏览器窗口，再删除所选 UUID 目录；清除所有网页登录会话可删除整个插件专用 profiles 目录。CLI 的账号关联保存在该目录下的 `cli-profile.json`，不是网页 Cookie。
 
 本项目非官方，与 OpenAI 无关联。使用 ChatGPT 网页自动化时请自行评估其服务条款与账号限制。
 

@@ -209,7 +209,7 @@ export class BrowserBridge {
     async call(method, params, signal) {
         checkAbort(signal);
         await this.start();
-        return await this.rawCall(method, params, method === "loginWait" ? this.options.loginTimeoutMs + 15_000 : method === "guestWait" ? 75_000 : 60_000, signal);
+        return await this.rawCall(method, params, method === "loginWait" ? this.options.loginTimeoutMs + 15_000 : method === "guestWait" ? 75_000 : 300_000, signal);
     }
     async open(profileId, completion, signal) {
         checkAbort(signal);

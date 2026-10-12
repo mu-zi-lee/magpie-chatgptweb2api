@@ -4,11 +4,12 @@ import { access, readFile, lstat, open, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { WebError, delay } from "./errors.js";
+import { managedBrowserExecutable } from "./browser-install.js";
 async function executable(options) {
     if (options.executablePath)
         return options.executablePath;
     if (!options.channel)
-        return chromium.executablePath();
+        return await managedBrowserExecutable();
     const edge = options.channel === "msedge";
     const candidates = process.platform === "darwin" ? [
         `/Applications/${edge ? "Microsoft Edge" : "Google Chrome"}.app/Contents/MacOS/${edge ? "Microsoft Edge" : "Google Chrome"}`,
@@ -93,6 +94,9 @@ export async function connectKeptBrowser(directory, options, site) {
                     if (e.code !== "ENOENT")
                         throw e;
                 }
+                if (process.platform === "linux" && !options.headless && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY) {
+                    throw new WebError("Visible browser login needs a desktop display; run on a desktop or configure Xvfb/noVNC for remote login", 503, "browser_display_missing");
+                }
                 const args = [`--user-data-dir=${directory}`, "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0", "--no-first-run", "--no-default-browser-check"];
                 if (options.headless)
                     args.push("--headless=new");
@@ -104,7 +108,7 @@ export async function connectKeptBrowser(directory, options, site) {
                 child.once("exit", () => { exited = true; });
                 await new Promise((resolve, reject) => {
                     child.once("spawn", resolve);
-                    child.once("error", () => reject(new WebError("Unable to open the dedicated browser", 503, "browser_launch_failed")));
+                    child.once("error", error => reject(new WebError(error.code === "ENOENT" ? "Configured browser executable was not found; check executablePath or channel" : "Unable to execute the dedicated browser; check executable permissions", 503, error.code === "ENOENT" ? "browser_missing" : "browser_launch_failed")));
                 });
                 child.unref();
                 const deadline = Date.now() + 20_000;

@@ -28,7 +28,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test --test-concurrency=1 test/*.test.mjs",
     "test:magpie": "npm run build && node --test test/magpie-host.integration.mjs",
-    "browser:install": "playwright install chromium",
+    "browser:install": "node dist/install-browser-cli.js",
     "login": "npm run build && node dist/cli.js login",
     "guest": "npm run build && node dist/cli.js guest",
     "doctor": "npm run build && node dist/cli.js doctor",
